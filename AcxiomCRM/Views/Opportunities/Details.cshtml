@@ -1,0 +1,140 @@
+@model Opportunity
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = $"Opportunity - {Model.OpportunityName}";
+    var stages = Enum.GetValues<OpportunityStage>();
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h4 class="fw-bold mb-0">@Model.OpportunityName</h4>
+            <span class="badge bg-light text-dark border">Stage: @Model.Stage</span>
+            <span class="badge badge-subtle @(Model.Status == OpportunityStatus.Won ? "bg-success bg-opacity-10 text-success" : Model.Status == OpportunityStatus.Lost ? "bg-danger bg-opacity-10 text-danger" : "bg-primary bg-opacity-10 text-primary")">
+                @Model.Status
+            </span>
+        </div>
+        <p class="text-muted small mb-0">Client: <strong>@Model.Customer.CustomerName</strong> &bull; Deal Owner: <strong>@(Model.AssignedUser?.FullName ?? "Unassigned")</strong></p>
+    </div>
+
+    <div class="d-flex gap-2">
+        @if ((Model.Status != OpportunityStatus.Won && Model.Status != OpportunityStatus.Lost) || CurrentUser.IsAdmin)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.OpportunityId" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil me-1"></i> Edit Deal
+            </a>
+        }
+        <a asp-controller="FollowUps" asp-action="Create" asp-route-opportunityId="@Model.OpportunityId" class="btn btn-primary">
+            <i class="bi bi-calendar-plus me-1"></i> Schedule Follow-Up
+        </a>
+    </div>
+</div>
+
+<!-- Commercial KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+        <div class="crm-card p-3">
+            <span class="text-muted small fw-semibold d-block mb-1">Total Amount</span>
+            <div class="fw-bold fs-5 text-success">₹@Model.Amount.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="crm-card p-3">
+            <span class="text-muted small fw-semibold d-block mb-1">Win Probability</span>
+            <div class="fw-bold fs-5">@Model.Probability%</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="crm-card p-3">
+            <span class="text-muted small fw-semibold d-block mb-1">Weighted Value</span>
+            <div class="fw-bold fs-5 text-primary">₹@Model.WeightedAmount.ToString("N0")</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="crm-card p-3">
+            <span class="text-muted small fw-semibold d-block mb-1">Expected Close Date</span>
+            <div class="fw-bold fs-5">@Model.ExpectedCloseDate.ToString("yyyy-MM-dd")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Opportunity Details & Stage Progress Card -->
+<div class="crm-card p-4 mb-4">
+    <h6 class="fw-bold mb-3">Pipeline Progression</h6>
+    <div class="progress mb-3" style="height: 10px;">
+        @{
+            var percent = Model.Stage switch
+            {
+                OpportunityStage.Qualification => 20,
+                OpportunityStage.Proposal => 40,
+                OpportunityStage.Negotiation => 70,
+                OpportunityStage.Won => 100,
+                OpportunityStage.Lost => 100,
+                _ => 10
+            };
+            var barClass = Model.Status == OpportunityStatus.Won ? "bg-success" : Model.Status == OpportunityStatus.Lost ? "bg-danger" : "bg-primary";
+        }
+        <div class="progress-bar @barClass" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <!-- Quick Stage Buttons -->
+    <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+        @foreach (OpportunityStage s in stages)
+        {
+            if (s == Model.Stage)
+            {
+                <button type="button" class="btn btn-sm btn-dark" disabled><i class="bi bi-check-lg"></i> @s (Current)</button>
+            }
+            else
+            {
+                <form asp-action="ChangeStage" asp-route-id="@Model.OpportunityId" asp-route-newStage="@s" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Advance to @s</button>
+                </form>
+            }
+        }
+    </div>
+</div>
+
+<!-- Notes & Follow-Ups Card -->
+<div class="crm-card p-4">
+    <div class="mb-4">
+        <h6 class="fw-bold mb-2">Deal Notes & Background</h6>
+        <p class="text-muted" style="white-space: pre-wrap;">@(string.IsNullOrWhiteSpace(Model.Notes) ? "No notes added." : Model.Notes)</p>
+    </div>
+
+    <div>
+        <h6 class="fw-bold mb-3">Scheduled Follow-Ups</h6>
+        @if (Model.FollowUps.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in Model.FollowUps)
+                        {
+                            <tr>
+                                <td>@f.FollowUpDate.ToString("yyyy-MM-dd")</td>
+                                <td><span class="badge bg-light text-dark border">@f.FollowUpType</span></td>
+                                <td><strong>@f.Subject</strong></td>
+                                <td><span class="badge bg-secondary">@f.Status</span></td>
+                                <td class="text-muted small">@(f.Remarks ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-muted text-center py-3">No follow-ups recorded for this deal.</div>
+        }
+    </div>
+</div>

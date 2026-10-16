@@ -1,0 +1,140 @@
+@model LeadListViewModel
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Leads";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Leads Pipeline</h4>
+        <p class="text-muted small mb-0">Capture, nurture, qualify, and convert sales prospects</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary d-inline-flex align-items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Lead</span>
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="crm-card p-3 mb-4">
+    <form method="get" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-12 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control border-start-0" placeholder="Search by lead name, company, email..." />
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <select name="status" class="form-select" asp-items="Html.GetEnumSelectList<LeadStatus>()">
+                <option value="">All Statuses</option>
+            </select>
+        </div>
+
+        @if (CurrentUser.IsAdmin || CurrentUser.IsManager)
+        {
+            <div class="col-6 col-md-3">
+                <select name="assignedTo" class="form-select" asp-items="Model.UsersList">
+                    <option value="">All Assignees</option>
+                </select>
+            </div>
+        }
+
+        <div class="col-12 col-md-1 d-flex gap-2">
+            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Leads Table -->
+<div class="crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Lead Name</th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Priority</th>
+                    <th>Expected Value</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Leads.Any())
+                {
+                    @foreach (var l in Model.Leads)
+                    {
+                        <tr>
+                            <td><span class="badge bg-light text-dark border">@l.LeadCode</span></td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@l.LeadId" class="fw-semibold text-primary text-decoration-none">
+                                    @l.LeadName
+                                </a>
+                                @if (!string.IsNullOrEmpty(l.Email))
+                                {
+                                    <div class="text-muted small">@l.Email</div>
+                                }
+                            </td>
+                            <td>@(l.CompanyName ?? "-")</td>
+                            <td><span class="badge bg-light text-dark">@l.Source</span></td>
+                            <td>
+                                <span class="badge @(l.Priority == LeadPriority.High ? "bg-danger bg-opacity-10 text-danger" : l.Priority == LeadPriority.Medium ? "bg-warning bg-opacity-10 text-warning" : "bg-info bg-opacity-10 text-info")">
+                                    @l.Priority
+                                </span>
+                            </td>
+                            <td><strong>₹@l.ExpectedValue.ToString("N0")</strong></td>
+                            <td>
+                                <span class="badge badge-subtle @(l.Status == LeadStatus.Converted ? "bg-success bg-opacity-10 text-success" : l.Status == LeadStatus.Lost ? "bg-danger bg-opacity-10 text-danger" : l.Status == LeadStatus.Qualified ? "bg-primary bg-opacity-10 text-primary" : "bg-secondary bg-opacity-10 text-secondary")">
+                                    @l.Status
+                                </span>
+                            </td>
+                            <td>@(l.AssignedUser?.FullName ?? "Unassigned")</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@l.LeadId" class="btn btn-outline-secondary" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (l.Status != LeadStatus.Converted && l.Status != LeadStatus.Lost)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@l.LeadId" class="btn btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="ChangeStatus" asp-route-id="@l.LeadId" class="btn btn-outline-primary" title="Change Status">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </a>
+                                    }
+                                    @if (l.Status == LeadStatus.Qualified)
+                                    {
+                                        <a asp-action="Convert" asp-route-id="@l.LeadId" class="btn btn-outline-success" title="Convert to Customer">
+                                            <i class="bi bi-check2-circle"></i> Convert
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="bi bi-funnel fs-3 d-block mb-2"></i>
+                            No leads found matching the filter criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <span class="text-muted small">Showing @Model.Leads.Count of @Model.TotalCount leads</span>
+        <partial name="_PaginationPartial" model="(Model.Page, Model.TotalPages, nameof(LeadsController.Index))" />
+    </div>
+</div>

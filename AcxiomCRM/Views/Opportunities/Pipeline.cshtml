@@ -1,0 +1,104 @@
+@model OpportunityPipelineViewModel
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Pipeline Board";
+    var stages = Enum.GetValues<OpportunityStage>();
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Visual Sales Pipeline</h4>
+        <p class="text-muted small mb-0">Drag and advance deals across active lifecycle stages</p>
+    </div>
+    <div class="d-flex gap-2">
+        @if (CurrentUser.IsAdmin || CurrentUser.IsManager)
+        {
+            <form method="get" asp-action="Pipeline" class="d-flex gap-2">
+                <select name="assignedTo" class="form-select form-select-sm" asp-items="Model.UsersList" onchange="this.form.submit()">
+                    <option value="">All Deal Owners</option>
+                </select>
+            </form>
+        }
+        <a asp-action="Create" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-plus-lg"></i>
+            <span>New Deal</span>
+        </a>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-list-ul"></i> List View
+        </a>
+    </div>
+</div>
+
+<!-- Kanban Columns Container -->
+<div class="row g-3 flex-nowrap overflow-auto pb-4" style="min-height: 75vh;">
+    @foreach (var stage in stages)
+    {
+        var deals = Model.Board.ContainsKey(stage) ? Model.Board[stage] : new List<Opportunity>();
+        var totalAmount = deals.Sum(d => d.Amount);
+
+        <div class="col-12 col-md-4 col-xl-2" style="min-width: 290px;">
+            <div class="card bg-light border-0 h-100 shadow-sm" style="border-radius: 0.75rem;">
+                <!-- Column Header -->
+                <div class="card-header bg-white border-bottom py-3 rounded-top">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold small text-uppercase tracking-wider">@stage</span>
+                        <span class="badge bg-secondary rounded-pill">@deals.Count</span>
+                    </div>
+                    <div class="small fw-semibold text-primary">₹@totalAmount.ToString("N0")</div>
+                </div>
+
+                <!-- Deal Cards in Stage -->
+                <div class="card-body p-2 d-flex flex-column gap-2 overflow-auto" style="max-height: 70vh;">
+                    @if (deals.Any())
+                    {
+                        @foreach (var opp in deals)
+                        {
+                            <div class="card bg-white border shadow-sm p-3" style="border-radius: 0.5rem;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <a asp-action="Details" asp-route-id="@opp.OpportunityId" class="fw-semibold text-dark text-decoration-none small text-truncate" style="max-width: 190px;" title="@opp.OpportunityName">
+                                        @opp.OpportunityName
+                                    </a>
+                                    <span class="badge bg-light text-muted border small">@opp.Probability%</span>
+                                </div>
+
+                                <div class="text-muted small mb-2"><i class="bi bi-building me-1"></i> @opp.Customer.CustomerName</div>
+                                <div class="fw-bold text-success mb-2">₹@opp.Amount.ToString("N0")</div>
+
+                                <div class="d-flex justify-content-between align-items-center small text-muted pt-2 border-top">
+                                    <span><i class="bi bi-clock me-1"></i> @opp.ExpectedCloseDate.ToString("MMM dd")</span>
+                                    <span>@(opp.AssignedUser?.FullName?.Split(' ').FirstOrDefault() ?? "Staff")</span>
+                                </div>
+
+                                <!-- Move Stage Actions -->
+                                <div class="dropdown mt-2 pt-1">
+                                    <button class="btn btn-sm btn-outline-secondary w-100 py-1 dropdown-toggle small" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Move Stage
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        @foreach (OpportunityStage targetStage in stages)
+                                        {
+                                            if (targetStage != opp.Stage)
+                                            {
+                                                <li>
+                                                    <form asp-action="ChangeStage" asp-route-id="@opp.OpportunityId" asp-route-newStage="@targetStage" method="post">
+                                                        <button type="submit" class="dropdown-item small">
+                                                            Move to <strong>@targetStage</strong>
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted small">No deals in this stage</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

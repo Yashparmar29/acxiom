@@ -1,0 +1,49 @@
+@model LeadChangeStatusViewModel
+@{
+    ViewData["Title"] = "Change Lead Status";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-6">
+        <div class="crm-card p-4 p-md-5">
+            <div class="mb-4 border-bottom pb-3">
+                <h4 class="fw-bold mb-1">Update Lead Status</h4>
+                <p class="text-muted small mb-0">Progress lead <strong>@Model.LeadName</strong> through the qualification lifecycle</p>
+            </div>
+
+            <form asp-action="ChangeStatus" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                <input type="hidden" asp-for="LeadId" />
+                <input type="hidden" asp-for="CurrentStatus" />
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Current Status</label>
+                    <div><span class="badge bg-secondary fs-6">@Model.CurrentStatus</span></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NewStatus" class="form-label small fw-semibold">Allowed Next Status <span class="text-danger">*</span></label>
+                    <select asp-for="NewStatus" class="form-select">
+                        <option value="">-- Select Status --</option>
+                        @foreach (var st in Model.AllowedStatuses)
+                        {
+                            <option value="@st">@st</option>
+                        }
+                    </select>
+                    <span asp-validation-for="NewStatus" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label small fw-semibold">Status Change Remarks (Optional)</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Reason for status transition..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Details" asp-route-id="@Model.LeadId" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
