@@ -1,0 +1,62 @@
+@model PermissionsMatrixViewModel
+@{
+    ViewData["Title"] = "Role Permissions Matrix";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Role & Permissions Matrix</h4>
+        <p class="text-muted small mb-0">Security boundaries and access control rules enforced by the server</p>
+    </div>
+</div>
+
+<div class="crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Module / Domain</th>
+                    <th style="width: 25%;"><span class="badge bg-dark">Admin</span></th>
+                    <th style="width: 25%;"><span class="badge bg-primary">Manager</span></th>
+                    <th style="width: 25%;"><span class="badge bg-info">SalesExecutive</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Permissions)
+                {
+                    <tr>
+                        <td class="fw-semibold text-dark">
+                            <i class="bi bi-shield-check text-primary me-2"></i> @p.Module
+                        </td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success mb-1">Allowed</span>
+                            <div class="small text-muted">@p.AdminAccess</div>
+                        </td>
+                        <td>
+                            @if (p.ManagerAccess.Contains("No Access"))
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger mb-1">Restricted (403)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary mb-1">Team Scope</span>
+                            }
+                            <div class="small text-muted">@p.ManagerAccess</div>
+                        </td>
+                        <td>
+                            @if (p.SalesExecutiveAccess.Contains("No Access"))
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger mb-1">Restricted (403)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info bg-opacity-10 text-info mb-1">Own / Assigned</span>
+                            }
+                            <div class="small text-muted">@p.SalesExecutiveAccess</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

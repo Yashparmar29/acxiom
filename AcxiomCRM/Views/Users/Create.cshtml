@@ -1,0 +1,65 @@
+@model UserCreateViewModel
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="crm-card p-4 p-md-5">
+            <div class="mb-4 border-bottom pb-3">
+                <h4 class="fw-bold mb-1">Create User Account</h4>
+                <p class="text-muted small mb-0">Provision new user with assigned role permissions</p>
+            </div>
+
+            <form asp-action="Create" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                    <input asp-for="FullName" class="form-control" placeholder="e.g. Priya Iyer" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                    <input asp-for="Email" class="form-control" placeholder="priya@acxiomcrm.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label small fw-semibold">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="9820012345" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Role" class="form-label small fw-semibold">Assigned Role <span class="text-danger">*</span></label>
+                        <select asp-for="Role" class="form-select" asp-items="Model.RolesList"></select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label small fw-semibold">Temporary Password <span class="text-danger">*</span></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

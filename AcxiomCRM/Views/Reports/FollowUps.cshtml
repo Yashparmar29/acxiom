@@ -1,0 +1,80 @@
+@model FollowUpReportViewModel
+@{
+    ViewData["Title"] = "Follow-Up Report";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">Follow-Up Execution Report</h4>
+        <p class="text-muted small mb-0">Analysis of scheduled interactions, completion ratios, and overdue calls</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">Reports Hub</a>
+</div>
+
+<div class="crm-card p-3 mb-4">
+    <form method="get" asp-action="FollowUps" class="row g-2 align-items-center">
+        <div class="col-6 col-md-3">
+            <select name="status" class="form-select" asp-items="Html.GetEnumSelectList<FollowUpStatus>()">
+                <option value="">All Statuses</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <select name="type" class="form-select" asp-items="Html.GetEnumSelectList<FollowUpType>()">
+                <option value="">All Types</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" title="From Date" />
+        </div>
+        <div class="col-6 col-md-2">
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" title="To Date" />
+        </div>
+        <div class="col-12 col-md-2">
+            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Associated With</th>
+                    <th>Status</th>
+                    <th>Assignee</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.FollowUps.Any())
+                {
+                    @foreach (var f in Model.FollowUps)
+                    {
+                        <tr>
+                            <td>@f.FollowUpDate.ToString("yyyy-MM-dd")</td>
+                            <td><span class="badge bg-light text-dark border">@f.FollowUpType</span></td>
+                            <td><strong>@f.Subject</strong></td>
+                            <td>@(f.Customer?.CustomerName ?? f.Lead?.LeadName ?? "-")</td>
+                            <td><span class="badge @(f.Status == FollowUpStatus.Completed ? "bg-success" : f.Status == FollowUpStatus.Missed ? "bg-danger" : "bg-warning text-dark")">@f.Status</span></td>
+                            <td>@(f.AssignedUser?.FullName ?? "Unassigned")</td>
+                            <td class="small text-muted">@(f.Remarks ?? "-")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No follow-up records found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <span class="text-muted small">Showing @Model.FollowUps.Count of @Model.TotalCount follow-ups</span>
+        <partial name="_PaginationPartial" model="(Model.Page, Model.TotalPages, nameof(ReportsController.FollowUps))" />
+    </div>
+</div>

@@ -1,0 +1,110 @@
+@model AuditReportViewModel
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">System Audit Trail</h4>
+        <p class="text-muted small mb-0">Append-only compliance log of authentication, security, and record events</p>
+    </div>
+    <div>
+        <a asp-action="ExportCsv" asp-route-userFilter="@Model.UserFilter" asp-route-moduleFilter="@Model.ModuleFilter" asp-route-actionFilter="@Model.ActionFilter" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+            <i class="bi bi-download"></i>
+            <span>Export CSV</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filter Card -->
+<div class="crm-card p-3 mb-4">
+    <form method="get" asp-action="Index" class="row g-2 align-items-center">
+        <div class="col-12 col-md-3">
+            <input type="text" name="userFilter" value="@Model.UserFilter" class="form-control" placeholder="Filter by User / Email..." />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <input type="text" name="moduleFilter" value="@Model.ModuleFilter" class="form-control" placeholder="Module (e.g. Lead, Auth)..." />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <input type="text" name="actionFilter" value="@Model.ActionFilter" class="form-control" placeholder="Action (e.g. Create, Login)..." />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" title="From Date" />
+        </div>
+
+        <div class="col-6 col-md-2">
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" title="To Date" />
+        </div>
+
+        <div class="col-12 col-md-1 d-flex gap-2">
+            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Audit Trail Table -->
+<div class="crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>User</th>
+                    <th>Module</th>
+                    <th>Action</th>
+                    <th>Record ID</th>
+                    <th>Result</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                    <th class="text-end">View</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Logs.Any())
+                {
+                    @foreach (var l in Model.Logs)
+                    {
+                        <tr>
+                            <td class="small">@l.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td><span class="fw-semibold">@l.UserName</span></td>
+                            <td><span class="badge bg-light text-dark border">@l.Module</span></td>
+                            <td><strong>@l.Action</strong></td>
+                            <td class="text-muted small">@(l.RecordId ?? "-")</td>
+                            <td>
+                                <span class="badge @(l.Result == "Success" ? "bg-success bg-opacity-10 text-success" : l.Result == "Warning" ? "bg-warning bg-opacity-10 text-warning" : "bg-danger bg-opacity-10 text-danger")">
+                                    @l.Result
+                                </span>
+                            </td>
+                            <td class="text-muted small">@(l.IpAddress ?? "Unknown")</td>
+                            <td class="text-muted small text-truncate" style="max-width: 200px;" title="@l.Details">
+                                @(l.Details ?? "-")
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@l.AuditLogId" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            <i class="bi bi-journal-text fs-3 d-block mb-2"></i>
+                            No audit log entries found for the selected criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <span class="text-muted small">Showing @Model.Logs.Count of @Model.TotalCount entries</span>
+        <partial name="_PaginationPartial" model="(Model.Page, Model.TotalPages, nameof(AuditController.Index))" />
+    </div>
+</div>
