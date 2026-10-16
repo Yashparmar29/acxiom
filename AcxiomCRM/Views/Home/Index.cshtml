@@ -1,8 +1,337 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DashboardMetrics
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Executive Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1">CRM Dashboard</h4>
+        <p class="text-muted small mb-0">Overview of pipeline, conversions, team activities, and KPIs</p>
+    </div>
+
+    <!-- Date Range Filter Form -->
+    <form method="get" asp-action="Index" class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="btn-group btn-group-sm" role="group">
+            <a href="?dateFilter=today" class="btn @(ViewBag.DateFilter == "today" ? "btn-primary" : "btn-outline-secondary")">Today</a>
+            <a href="?dateFilter=week" class="btn @(ViewBag.DateFilter == "week" ? "btn-primary" : "btn-outline-secondary")">This Week</a>
+            <a href="?dateFilter=month" class="btn @(ViewBag.DateFilter == "month" ? "btn-primary" : "btn-outline-secondary")">This Month</a>
+            <a href="?dateFilter=all" class="btn @(ViewBag.DateFilter == "all" ? "btn-primary" : "btn-outline-secondary")">All Time</a>
+        </div>
+    </form>
 </div>
+
+<!-- Primary KPI Cards Row -->
+<div class="row g-3 mb-4">
+    <!-- Pipeline Value -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="crm-card card-stat">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Open Pipeline Value</span>
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-currency-rupee"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold mb-1">₹@Model.TotalPipelineValue.ToString("N0")</h3>
+            <div class="text-muted small">
+                Weighted: <strong class="text-dark">₹@Model.WeightedPipelineValue.ToString("N0")</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Customers -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="crm-card card-stat">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Active Customers</span>
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-buildings"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.TotalCustomers</h3>
+            <div class="text-muted small">Corporate client accounts</div>
+        </div>
+    </div>
+
+    <!-- Leads Overview -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="crm-card card-stat">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Leads in Pipeline</span>
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-funnel"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold mb-1">@Model.OpenLeads <span class="text-muted fs-6 fw-normal">/ @Model.TotalLeads total</span></h3>
+            <div class="text-muted small">Active qualification stage</div>
+        </div>
+    </div>
+
+    <!-- Deals Won -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="crm-card card-stat">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Closed Opportunities</span>
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-trophy"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-success mb-1">@Model.WonOpportunities <span class="text-muted fs-6 fw-normal">Won</span></h3>
+            <div class="text-muted small">@Model.LostOpportunities Lost | @Model.OpenOpportunities Open</div>
+        </div>
+    </div>
+</div>
+
+@if (CurrentUser.IsAdmin)
+{
+    <!-- Admin Security & System Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="crm-card p-3 border-start border-4 border-primary">
+                <div class="text-muted small fw-semibold">Total System Users</div>
+                <h4 class="fw-bold mb-0">@Model.TotalUsers</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="crm-card p-3 border-start border-4 border-success">
+                <div class="text-muted small fw-semibold">Active User Accounts</div>
+                <h4 class="fw-bold mb-0">@Model.ActiveUsers</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="crm-card p-3 border-start border-4 border-danger">
+                <div class="text-muted small fw-semibold">Locked User Accounts</div>
+                <h4 class="fw-bold text-danger mb-0">@Model.LockedUsers</h4>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="crm-card p-3 border-start border-4 border-info">
+                <div class="text-muted small fw-semibold">Audit Logs (7 Days)</div>
+                <h4 class="fw-bold mb-0">@Model.RecentSecurityEvents</h4>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Opportunity Pipeline Chart -->
+    <div class="col-12 col-lg-8">
+        <div class="crm-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Deal Pipeline by Stage</h6>
+                <span class="badge bg-light text-muted border">Amount in ₹</span>
+            </div>
+            <div style="height: 280px;">
+                <canvas id="pipelineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lead Status Doughnut Chart -->
+    <div class="col-12 col-lg-4">
+        <div class="crm-card p-4 h-100">
+            <h6 class="fw-bold mb-3">Lead Status Distribution</h6>
+            <div style="height: 280px;" class="d-flex align-items-center justify-content-center">
+                <canvas id="leadStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Sales Trend Chart -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="crm-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Monthly Won Sales Trend (Last 12 Months)</h6>
+                <span class="badge bg-success bg-opacity-10 text-success">Closed Revenue</span>
+            </div>
+            <div style="height: 260px;">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Follow-Ups & Recent Activities -->
+<div class="row g-4">
+    <!-- Upcoming Follow-ups -->
+    <div class="col-12 col-lg-6">
+        <div class="crm-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-1 text-primary"></i> Pending & Upcoming Follow-Ups</h6>
+                <a asp-controller="FollowUps" asp-action="Index" class="btn btn-sm btn-link text-decoration-none">View All</a>
+            </div>
+
+            @if (Model.UpcomingFollowUps.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var f in Model.UpcomingFollowUps)
+                    {
+                        <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary me-2">@f.FollowUpType</span>
+                                    <strong class="text-dark">@f.Subject</strong>
+                                </div>
+                                <span class="badge bg-light text-dark border">@f.FollowUpDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Related: @(f.Customer?.CustomerName ?? f.Lead?.LeadName ?? f.Opportunity?.OpportunityName ?? "N/A")
+                                @if (f.AssignedUser != null)
+                                {
+                                    <span> &bull; Assignee: @f.AssignedUser.FullName</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-muted text-center py-4">No upcoming follow-ups scheduled.</div>
+            }
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="col-12 col-lg-6">
+        <div class="crm-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-activity me-1 text-info"></i> Recent Customer Activities</h6>
+                <a asp-controller="Activities" asp-action="Index" class="btn btn-sm btn-link text-decoration-none">View All</a>
+            </div>
+
+            @if (Model.RecentActivities.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var a in Model.RecentActivities)
+                    {
+                        <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-info bg-opacity-10 text-info me-2">@a.ActivityType</span>
+                                    <strong class="text-dark">@a.Subject</strong>
+                                </div>
+                                <span class="text-muted small">@a.ActivityDate.ToString("MMM dd, HH:mm")</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                @if (a.Customer != null)
+                                {
+                                    <span>Client: @a.Customer.CustomerName</span>
+                                }
+                                @if (a.AssignedUser != null)
+                                {
+                                    <span> &bull; Logged by: @a.AssignedUser.FullName</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-muted text-center py-4">No recent activities found.</div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 1. Opportunity Pipeline Chart
+            $.getJSON('/Home/GetOpportunityPipelineChart', function (res) {
+                var ctx = document.getElementById('pipelineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: res.labels,
+                        datasets: [{
+                            label: 'Pipeline Value (₹)',
+                            data: res.data,
+                            backgroundColor: res.backgroundColors || '#4f46e5',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (val) {
+                                        return '₹' + Number(val).toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            // 2. Lead Status Doughnut Chart
+            $.getJSON('/Home/GetLeadStatusChart', function (res) {
+                var ctx = document.getElementById('leadStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: res.labels,
+                        datasets: [{
+                            data: res.data,
+                            backgroundColor: res.backgroundColors,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                        }
+                    }
+                });
+            });
+
+            // 3. Monthly Sales Trend Chart
+            $.getJSON('/Home/GetMonthlySalesChart', function (res) {
+                var ctx = document.getElementById('salesTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: res.labels,
+                        datasets: [{
+                            label: 'Won Revenue (₹)',
+                            data: res.data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10b981'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (val) {
+                                        return '₹' + Number(val).toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

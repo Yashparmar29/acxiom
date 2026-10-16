@@ -1,0 +1,106 @@
+@model CustomerCreateEditViewModel
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="crm-card p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div>
+                    <h4 class="fw-bold mb-1">Edit Customer Account</h4>
+                    <p class="text-muted small mb-0">Update verified client information</p>
+                </div>
+                <span class="badge bg-light text-dark border">Code: @Model.CustomerCode</span>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@Model.CustomerId" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                <input type="hidden" asp-for="CustomerId" />
+                <input type="hidden" asp-for="CustomerCode" />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CustomerName" class="form-label small fw-semibold">Customer Name <span class="text-danger">*</span></label>
+                        <input asp-for="CustomerName" class="form-control" />
+                        <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CompanyName" class="form-label small fw-semibold">Parent Company</label>
+                        <input asp-for="CompanyName" class="form-control" />
+                        <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Email" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Phone" class="form-label small fw-semibold">Indian Mobile <span class="text-danger">*</span></label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label small fw-semibold">Street Address</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-4">
+                        <label asp-for="City" class="form-label small fw-semibold">City</label>
+                        <input asp-for="City" class="form-control" />
+                        <span asp-validation-for="City" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label asp-for="State" class="form-label small fw-semibold">State</label>
+                        <input asp-for="State" class="form-control" />
+                        <span asp-validation-for="State" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label asp-for="Status" class="form-label small fw-semibold">Account Status</label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<CustomerStatus>()"></select>
+                    </div>
+                </div>
+
+                @if (CurrentUser.IsAdmin || CurrentUser.IsManager)
+                {
+                    <div class="mb-3">
+                        <label asp-for="AssignedTo" class="form-label small fw-semibold">Assign Account Owner</label>
+                        <select asp-for="AssignedTo" class="form-select" asp-items="Model.UsersList"></select>
+                        <span asp-validation-for="AssignedTo" class="text-danger small"></span>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="AssignedTo" />
+                }
+
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label small fw-semibold">Internal Notes</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
