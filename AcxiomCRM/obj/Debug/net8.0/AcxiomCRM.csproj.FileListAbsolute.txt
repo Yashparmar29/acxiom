@@ -160,3 +160,4 @@ E:\acxiom\AcxiomCRM\obj\Debug\net8.0\refint\AcxiomCRM.dll
 E:\acxiom\AcxiomCRM\obj\Debug\net8.0\AcxiomCRM.pdb
 E:\acxiom\AcxiomCRM\obj\Debug\net8.0\AcxiomCRM.genruntimeconfig.cache
 E:\acxiom\AcxiomCRM\obj\Debug\net8.0\ref\AcxiomCRM.dll
+E:\acxiom\AcxiomCRM\obj\Debug\net8.0\AcxiomCRM.sourcelink.json

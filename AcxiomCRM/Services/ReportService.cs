@@ -224,10 +224,10 @@ public class ReportService : IReportService
     {
         var (customers, _) = await GetCustomerReportAsync(status, fromDate, toDate, 1, 10000);
         var sb = new StringBuilder();
-        sb.WriteLine("CustomerCode,CustomerName,Email,Phone,CompanyName,Status,City,State,AssignedTo,CreatedDate");
+        sb.AppendLine("CustomerCode,CustomerName,Email,Phone,CompanyName,Status,City,State,AssignedTo,CreatedDate");
         foreach (var c in customers)
         {
-            sb.WriteLine($"\"{c.CustomerCode}\",\"{c.CustomerName}\",\"{c.Email}\",\"{c.Phone}\",\"{c.CompanyName}\",\"{c.Status}\",\"{c.City}\",\"{c.State}\",\"{c.AssignedUser?.FullName}\",\"{c.CreatedDate:yyyy-MM-dd}\"");
+            sb.AppendLine($"\"{c.CustomerCode}\",\"{c.CustomerName}\",\"{c.Email}\",\"{c.Phone}\",\"{c.CompanyName}\",\"{c.Status}\",\"{c.City}\",\"{c.State}\",\"{c.AssignedUser?.FullName}\",\"{c.CreatedDate:yyyy-MM-dd}\"");
         }
         return Encoding.UTF8.GetBytes(sb.ToString());
     }
@@ -236,10 +236,10 @@ public class ReportService : IReportService
     {
         var (leads, _) = await GetLeadReportAsync(status, source, fromDate, toDate, 1, 10000);
         var sb = new StringBuilder();
-        sb.WriteLine("LeadCode,LeadName,Email,Phone,CompanyName,Source,Status,Priority,ExpectedValue,AssignedTo,CreatedDate");
+        sb.AppendLine("LeadCode,LeadName,Email,Phone,CompanyName,Source,Status,Priority,ExpectedValue,AssignedTo,CreatedDate");
         foreach (var l in leads)
         {
-            sb.WriteLine($"\"{l.LeadCode}\",\"{l.LeadName}\",\"{l.Email}\",\"{l.Phone}\",\"{l.CompanyName}\",\"{l.Source}\",\"{l.Status}\",\"{l.Priority}\",{l.ExpectedValue},\"{l.AssignedUser?.FullName}\",\"{l.CreatedDate:yyyy-MM-dd}\"");
+            sb.AppendLine($"\"{l.LeadCode}\",\"{l.LeadName}\",\"{l.Email}\",\"{l.Phone}\",\"{l.CompanyName}\",\"{l.Source}\",\"{l.Status}\",\"{l.Priority}\",{l.ExpectedValue},\"{l.AssignedUser?.FullName}\",\"{l.CreatedDate:yyyy-MM-dd}\"");
         }
         return Encoding.UTF8.GetBytes(sb.ToString());
     }
@@ -248,10 +248,10 @@ public class ReportService : IReportService
     {
         var (opps, _) = await GetOpportunityReportAsync(stage, status, fromDate, toDate, 1, 10000);
         var sb = new StringBuilder();
-        sb.WriteLine("OpportunityName,Customer,Amount,Probability,WeightedAmount,Stage,Status,ExpectedCloseDate,AssignedTo");
+        sb.AppendLine("OpportunityName,Customer,Amount,Probability,WeightedAmount,Stage,Status,ExpectedCloseDate,AssignedTo");
         foreach (var o in opps)
         {
-            sb.WriteLine($"\"{o.OpportunityName}\",\"{o.Customer.CustomerName}\",{o.Amount},{o.Probability},{o.WeightedAmount},\"{o.Stage}\",\"{o.Status}\",\"{o.ExpectedCloseDate:yyyy-MM-dd}\",\"{o.AssignedUser?.FullName}\"");
+            sb.AppendLine($"\"{o.OpportunityName}\",\"{o.Customer.CustomerName}\",{o.Amount},{o.Probability},{o.WeightedAmount},\"{o.Stage}\",\"{o.Status}\",\"{o.ExpectedCloseDate:yyyy-MM-dd}\",\"{o.AssignedUser?.FullName}\"");
         }
         return Encoding.UTF8.GetBytes(sb.ToString());
     }
@@ -260,19 +260,19 @@ public class ReportService : IReportService
     {
         var (stages, owners, total, weighted) = await GetPipelineReportAsync();
         var sb = new StringBuilder();
-        sb.WriteLine("--- STAGE SUMMARY ---");
-        sb.WriteLine("Stage,Count,TotalAmount,WeightedAmount");
+        sb.AppendLine("--- STAGE SUMMARY ---");
+        sb.AppendLine("Stage,Count,TotalAmount,WeightedAmount");
         foreach (var s in stages)
         {
-            sb.WriteLine($"\"{s.Stage}\",{s.Count},{s.TotalAmount},{s.WeightedAmount}");
+            sb.AppendLine($"\"{s.Stage}\",{s.Count},{s.TotalAmount},{s.WeightedAmount}");
         }
-        sb.WriteLine($"Total,,{total},{weighted}");
-        sb.WriteLine();
-        sb.WriteLine("--- OWNER SUMMARY ---");
-        sb.WriteLine("Owner,Count,TotalAmount,WeightedAmount");
+        sb.AppendLine($"Total,,{total},{weighted}");
+        sb.AppendLine();
+        sb.AppendLine("--- OWNER SUMMARY ---");
+        sb.AppendLine("Owner,Count,TotalAmount,WeightedAmount");
         foreach (var o in owners)
         {
-            sb.WriteLine($"\"{o.OwnerName}\",{o.OpportunityCount},{o.TotalAmount},{o.WeightedAmount}");
+            sb.AppendLine($"\"{o.OwnerName}\",{o.OpportunityCount},{o.TotalAmount},{o.WeightedAmount}");
         }
         return Encoding.UTF8.GetBytes(sb.ToString());
     }

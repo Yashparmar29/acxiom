@@ -493,3 +493,4 @@ E:\acxiom\AcxiomCRM.Tests\obj\Debug\net8.0\refint\AcxiomCRM.Tests.dll
 E:\acxiom\AcxiomCRM.Tests\obj\Debug\net8.0\AcxiomCRM.Tests.pdb
 E:\acxiom\AcxiomCRM.Tests\obj\Debug\net8.0\AcxiomCRM.Tests.genruntimeconfig.cache
 E:\acxiom\AcxiomCRM.Tests\obj\Debug\net8.0\ref\AcxiomCRM.Tests.dll
+E:\acxiom\AcxiomCRM.Tests\obj\Debug\net8.0\AcxiomCRM.Tests.sourcelink.json
