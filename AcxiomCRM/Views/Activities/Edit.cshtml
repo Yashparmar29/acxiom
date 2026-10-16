@@ -1,0 +1,83 @@
+@model ActivityCreateEditViewModel
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Edit Activity";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="crm-card p-4 p-md-5">
+            <div class="mb-4 border-bottom pb-3">
+                <h4 class="fw-bold mb-1">Edit Activity Log</h4>
+                <p class="text-muted small mb-0">Update logged interaction details</p>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@Model.ActivityId" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                <input type="hidden" asp-for="ActivityId" />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="ActivityType" class="form-label small fw-semibold">Activity Type <span class="text-danger">*</span></label>
+                        <select asp-for="ActivityType" class="form-select" asp-items="Html.GetEnumSelectList<ActivityType>()"></select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="ActivityDate" class="form-label small fw-semibold">Timestamp <span class="text-danger">*</span></label>
+                        <input asp-for="ActivityDate" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="ActivityDate" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Subject" class="form-label small fw-semibold">Subject / Title <span class="text-danger">*</span></label>
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CustomerId" class="form-label small fw-semibold">Related Customer</label>
+                        <select asp-for="CustomerId" class="form-select" asp-items="Model.CustomersList">
+                            <option value="">-- None --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="LeadId" class="form-label small fw-semibold">Related Lead</label>
+                        <select asp-for="LeadId" class="form-select" asp-items="Model.LeadsList">
+                            <option value="">-- None --</option>
+                        </select>
+                    </div>
+                </div>
+
+                @if (CurrentUser.IsAdmin || CurrentUser.IsManager)
+                {
+                    <div class="mb-3">
+                        <label asp-for="AssignedTo" class="form-label small fw-semibold">Team Member</label>
+                        <select asp-for="AssignedTo" class="form-select" asp-items="Model.UsersList"></select>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="AssignedTo" />
+                }
+
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label small fw-semibold">Activity Details & Minutes</label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

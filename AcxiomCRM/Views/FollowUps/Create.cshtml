@@ -1,0 +1,90 @@
+@model FollowUpCreateViewModel
+@inject ICurrentUserService CurrentUser
+@{
+    ViewData["Title"] = "Schedule Follow-Up";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="crm-card p-4 p-md-5">
+            <div class="mb-4 border-bottom pb-3">
+                <h4 class="fw-bold mb-1">Schedule Follow-Up</h4>
+                <p class="text-muted small mb-0">Plan a call, meeting, email, or task against a CRM entity</p>
+            </div>
+
+            <form asp-action="Create" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Subject" class="form-label small fw-semibold">Subject / Title <span class="text-danger">*</span></label>
+                    <input asp-for="Subject" class="form-control" placeholder="e.g. Discuss commercial proposal and pricing" />
+                    <span asp-validation-for="Subject" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="FollowUpDate" class="form-label small fw-semibold">Date <span class="text-danger">*</span></label>
+                        <input asp-for="FollowUpDate" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="FollowUpDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="FollowUpType" class="form-label small fw-semibold">Follow-Up Type</label>
+                        <select asp-for="FollowUpType" class="form-select" asp-items="Html.GetEnumSelectList<FollowUpType>()"></select>
+                    </div>
+                </div>
+
+                <div class="card bg-light border-0 p-3 mb-3">
+                    <span class="small fw-bold text-secondary mb-2 d-block">Associate With (select at least one):</span>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-4">
+                            <label asp-for="CustomerId" class="form-label small">Customer Account</label>
+                            <select asp-for="CustomerId" class="form-select form-select-sm" asp-items="Model.CustomersList">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label asp-for="LeadId" class="form-label small">Lead Prospect</label>
+                            <select asp-for="LeadId" class="form-select form-select-sm" asp-items="Model.LeadsList">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label asp-for="OpportunityId" class="form-label small">Deal / Opportunity</label>
+                            <select asp-for="OpportunityId" class="form-select form-select-sm" asp-items="Model.OpportunitiesList">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                @if (CurrentUser.IsAdmin || CurrentUser.IsManager)
+                {
+                    <div class="mb-3">
+                        <label asp-for="AssignedTo" class="form-label small fw-semibold">Assign Task To</label>
+                        <select asp-for="AssignedTo" class="form-select" asp-items="Model.UsersList"></select>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="AssignedTo" />
+                }
+
+                <div class="mb-4">
+                    <label asp-for="Remarks" class="form-label small fw-semibold">Preparation Notes / Objective</label>
+                    <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Notes for the call/meeting agenda..."></textarea>
+                    <span asp-validation-for="Remarks" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">Schedule Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
