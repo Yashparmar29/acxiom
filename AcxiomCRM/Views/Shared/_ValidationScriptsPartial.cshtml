@@ -1,2 +1,53 @@
-﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    (function ($) {
+        if (!$) return;
+
+        // 1. Indian Phone Validator
+        $.validator.addMethod("indianphone", function (value, element) {
+            if (this.optional(element)) return true;
+            return /^(?:\+91[\-\s]?)?[6-9]\d{9}$/.test(value.trim());
+        });
+        $.validator.unobtrusive.adapters.addBool("indianphone");
+
+        // 2. Future Or Today Validator
+        $.validator.addMethod("futureortoday", function (value, element) {
+            if (this.optional(element)) return true;
+            var inputDate = new Date(value);
+            inputDate.setHours(0, 0, 0, 0);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return inputDate >= today;
+        });
+        $.validator.unobtrusive.adapters.addBool("futureortoday");
+
+        // 3. Amount Greater Than Zero
+        $.validator.addMethod("amountgreaterthanzero", function (value, element) {
+            if (this.optional(element)) return false;
+            var num = parseFloat(value);
+            return !isNaN(num) && num > 0;
+        });
+        $.validator.unobtrusive.adapters.addBool("amountgreaterthanzero");
+
+        // 4. Valid Probability (0 - 100)
+        $.validator.addMethod("validprobability", function (value, element) {
+            if (this.optional(element)) return false;
+            var num = parseInt(value, 10);
+            return !isNaN(num) && num >= 0 && num <= 100;
+        });
+        $.validator.unobtrusive.adapters.addBool("validprobability");
+
+        // 5. Close Date Not In Past
+        $.validator.addMethod("closedatenotinpast", function (value, element) {
+            if (this.optional(element)) return true;
+            var inputDate = new Date(value);
+            inputDate.setHours(0, 0, 0, 0);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return inputDate >= today;
+        });
+        $.validator.unobtrusive.adapters.addBool("closedatenotinpast");
+    })(jQuery);
+</script>
