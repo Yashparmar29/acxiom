@@ -1,3 +1,4 @@
+
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AcxiomCRM.Models.Entities;
