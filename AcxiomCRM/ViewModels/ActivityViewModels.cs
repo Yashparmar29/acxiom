@@ -5,7 +5,21 @@ using AcxiomCRM.Models.Enums;
 
 namespace AcxiomCRM.ViewModels;
 
-
+public class ActivityListViewModel
+{
+    public List<Activity> Activities { get; set; } = new();
+    public string? SearchTerm { get; set; }
+    public ActivityType? Type { get; set; }
+    public ActivityStatus? Status { get; set; }
+    public string? AssignedTo { get; set; }
+    public int? CustomerId { get; set; }
+    public int? LeadId { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public int TotalCount { get; set; }
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+    public SelectList? UsersList { get; set; }
+}
 
 public class ActivityCreateEditViewModel
 {
